@@ -36,10 +36,10 @@ Frame: TypeAlias = (
     framelib.ICRS |
     framelib.mean_equator_and_equinox_of_date |
     framelib.true_equator_and_equinox_of_date |
-    framelib.tirs |
-    framelib.itrs |
-    framelib.ecliptic_frame |
-    framelib.InertialFrame
+    type[framelib.tirs] |
+    type[framelib.itrs] |
+    type[framelib.ecliptic_frame] |
+    type[framelib.InertialFrame]
 )
 """TypeAlias for all frame classes of framelib."""
 
