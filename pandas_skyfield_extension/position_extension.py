@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import re
 import sys
-from typing import Any, TypeAlias
+from typing import Any
 import warnings
 
 import astropy.units as u
@@ -16,7 +16,7 @@ from pandas.api.extensions import (
     register_extension_dtype,
     register_series_accessor,
 )
-from pandas.api.types import is_array_like, is_list_like, is_scalar
+from pandas.api.types import is_array_like, is_scalar
 from pandas.compat import set_function_name
 from pandas.core.algorithms import take
 from pandas.core.dtypes.generic import ABCIndex, ABCSeries, ABCDataFrame
@@ -25,23 +25,12 @@ from pandas.core.indexers import (
     getitem_returns_view,
 )
 from pandas.util._exceptions import find_stack_level
-import pandas_units_extension
+import pandas_units_extension as pue
 import skyfield.api as sf
-from skyfield import framelib, positionlib, toposlib, vectorlib
+from skyfield import positionlib, toposlib
 
-from .options import config
-
-# Create type alias for all frames
-Frame: TypeAlias = (
-    framelib.ICRS |
-    framelib.mean_equator_and_equinox_of_date |
-    framelib.true_equator_and_equinox_of_date |
-    type[framelib.tirs] |
-    type[framelib.itrs] |
-    type[framelib.ecliptic_frame] |
-    type[framelib.InertialFrame]
-)
-"""TypeAlias for all frame classes of framelib."""
+from pandas_skyfield_extension.options import config
+from pandas_skyfield_extension.typing import Frame
 
 
 def as_position(obj) -> positionlib.ICRF:
@@ -57,11 +46,13 @@ def as_position(obj) -> positionlib.ICRF:
     else:
         raise TypeError(f"Cannot convert {obj} to a position.")
 
+
 def _copy_sf_time(t: sf.Time) -> sf.Time:
     """Create a copy of a Skyfield Time object."""
     # tt_fraction is subtracted from tt as constructor adds tt_fraction to tt, 
     # so it is needed to subtract it here to get the same time.
     return sf.Time(t.ts, t.tt - t.tt_fraction, t.tt_fraction)
+
 
 def _copy_position(pos: positionlib.ICRF) -> positionlib.ICRF:
     """Create a copy of the position."""
@@ -73,101 +64,6 @@ def _copy_position(pos: positionlib.ICRF) -> positionlib.ICRF:
         target=pos.target
     )
 
-def to_sf_time(times, ts: sf.Timescale | None = None) -> sf.Time:
-    """Convert the input to a Skyfield Time object.
-
-    Parameters
-    ----------
-    times: datetime.datetime or sf.Time or convertible by pd.to_datetime
-        The times to convert.
-    ts: sf.Timescale, optional
-        The timescale to use for the conversion. If None, the default timescale will be used.
-
-    Returns
-    -------
-    sf.Time
-        The converted times as a Skyfield Time object.
-    """
-    if isinstance(times, sf.Time):
-        return times
-
-    # Use default timescale if not provided
-    if not ts:
-        ts = sf.load.timescale()
-
-    # Convert datetime-like objects to array of datetimes
-    dts = pd.to_datetime(times).to_pydatetime()
-
-    # If times is a single datetime, convert it to a list of one datetime
-    if not is_list_like(dts):
-        dts = [dts]
-
-    # Convert to Skyfield Time object
-    return ts.from_datetimes(dts)
-
-
-def sf_position_to_series(position: positionlib.ICRF, **kwargs) -> pd.Series:
-    """Convert a Skyfield position to a pandas Series.
-    
-    Parameters
-    ----------
-    position: positionlib.ICRF
-        The position to convert.
-    kwargs: dict
-        Additional keyword arguments to pass to the pd.Series constructor.
-    
-    Returns
-    -------
-    pd.Series
-        A Series containing the position.
-    """
-    return pd.Series(SkyfieldPositionExtensionArray(position), **kwargs)
-
-
-def at(obj: vectorlib.VectorFunction, times: Any, set_datetime_idx: bool = True, ts: sf.Timescale | None = None, **kwargs) -> pd.Series:
-    """Calculate the position of the object at the given times and return it as a pandas Series.
-    
-    Parameters
-    ----------
-    obj: skyfield.vectorlib.VectorFunction
-        The object for which to calculate the position.
-        Skyfield object supporting the .at() method, e.g. EarthSatellite, Topos, GeographicPosition, etc.
-    times: datetime.datetime or sf.Time or convertible by pd.to_datetime()
-        The times at which to calculate the position.
-    set_datetime_idx: bool, default True
-        If True and "index" is not in kwargs, set the index of the resulting Series to the given times.
-    ts: sf.Timescale, optional
-        The timescale to use for the conversion. If None, the default timescale will be used.
-    kwargs: dict
-        Additional keyword arguments to pass to the pd.Series constructor.
-
-    Returns
-    -------
-    pd.Series
-        A Series containing the positions at the given times.
-    """
-    # Convert times to Skyfield Time object
-    times_sf = to_sf_time(times, ts)
-
-    # Calculate positions at the given times
-    pos: positionlib.ICRF = obj.at(times_sf)
-
-    # If requested, set the index of the resulting Series to the given times
-    if set_datetime_idx and "index" not in kwargs:
-        # Avoid unnecessary copy of times if it's already a DatetimeIndex
-        if isinstance(times, pd.DatetimeIndex):
-            kwargs["index"] = times
-        else:
-            kwargs["index"] = pd.to_datetime(times_sf.utc_datetime())
-    
-    # If name of the resulting series is not provided, try to infer it from the object
-    if "name" not in kwargs:
-        name: str = getattr(obj, "name", None) or getattr(obj, "target_name", None) or None
-        if name:
-            kwargs["name"] = f"{name}"
-
-    # Convert position to pandas Series
-    return sf_position_to_series(pos, **kwargs)
 
 def convert(pos: positionlib.ICRF, dtype: SkyfieldPositionDtype):
     raise NotImplementedError
