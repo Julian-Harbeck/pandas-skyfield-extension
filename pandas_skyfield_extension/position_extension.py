@@ -18,14 +18,14 @@ from pandas.api.extensions import (
 )
 from pandas.api.types import is_array_like, is_scalar
 from pandas.compat import set_function_name
-from pandas.core.algorithms import take
+from pandas.core.algorithms import take  # noqa: F401
 from pandas.core.dtypes.generic import ABCIndex, ABCSeries, ABCDataFrame
 from pandas.core.indexers import (
     check_array_indexer,
     getitem_returns_view,
 )
 from pandas.util._exceptions import find_stack_level
-import pandas_units_extension as pue
+import pandas_units_extension as pue  # noqa: F401 needs to be imported for the UnitsDtype to be registered
 import skyfield.api as sf
 from skyfield import positionlib, toposlib
 
@@ -49,7 +49,7 @@ def as_position(obj) -> positionlib.ICRF:
 
 def _copy_sf_time(t: sf.Time) -> sf.Time:
     """Create a copy of a Skyfield Time object."""
-    # tt_fraction is subtracted from tt as constructor adds tt_fraction to tt, 
+    # tt_fraction is subtracted from tt as constructor adds tt_fraction to tt,
     # so it is needed to subtract it here to get the same time.
     return sf.Time(t.ts, t.tt - t.tt_fraction, t.tt_fraction)
 
@@ -61,7 +61,7 @@ def _copy_position(pos: positionlib.ICRF) -> positionlib.ICRF:
         velocity_au_per_d=pos.velocity.au_per_d.copy(),
         t=_copy_sf_time(pos.t),
         center=pos.center,
-        target=pos.target
+        target=pos.target,
     )
 
 
@@ -86,7 +86,7 @@ class SkyfieldPositionDtype(ExtensionDtype):
     _is_numeric = False
     _metadata = ("frame",)
 
-    def __init__(self, frame = None):
+    def __init__(self, frame=None):
         if frame is None:
             self.frame = positionlib.ICRF
         elif issubclass(frame, positionlib.ICRF):
@@ -108,7 +108,9 @@ class SkyfieldPositionDtype(ExtensionDtype):
         # Parse the string to extract the frame name
         match = re.match(f"{cls.BASE_NAME}\\[(?P<name>.*)\\]$", string)
         if not match:
-            raise TypeError(f"Cannot construct a 'SkyfieldPositionDtype' from '{string}'")
+            raise TypeError(
+                f"Cannot construct a 'SkyfieldPositionDtype' from '{string}'"
+            )
 
         # Map from string to frame class
         str2frame_map: dict[str, type] = {
@@ -124,7 +126,9 @@ class SkyfieldPositionDtype(ExtensionDtype):
 
         # Check if the frame name is valid and construct the Dtype
         if match["name"] not in str2frame_map:
-            raise ValueError(f"Unknown frame name: {match['name']}.\nSupported frames are: {', '.join(str2frame_map.keys())}")
+            raise ValueError(
+                f"Unknown frame name: {match['name']}.\nSupported frames are: {', '.join(str2frame_map.keys())}"
+            )
         return cls(str2frame_map[match["name"]])
 
     @classmethod
@@ -139,17 +143,23 @@ class SkyfieldPositionDtype(ExtensionDtype):
     def __repr__(self):
         return f'{self.__class__.__name__}("{self.frame}")'
 
+
 class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
     """Pandas extension array supporting skyfield positions."""
 
     def __init__(
-        self, position: positionlib.ICRF | SkyfieldPositionExtensionArray, frame: type | None = None, copy: bool = True
+        self,
+        position: positionlib.ICRF | SkyfieldPositionExtensionArray,
+        frame: type | None = None,
+        copy: bool = True,
     ):
         position = as_position(position)
         if position is not None and not isinstance(position, positionlib.ICRF):
             raise ValueError(f"Invalid position type: {type(position)}")
         if frame is not None and frame is not type(position):
-            raise ValueError(f"Frame {frame} does not match position type {type(position)} and conversion is not yet implemented.")
+            raise ValueError(
+                f"Frame {frame} does not match position type {type(position)} and conversion is not yet implemented."
+            )
         else:
             frame = type(position)
         if copy:
@@ -178,9 +188,11 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
     def __array__(self, dtype=object, copy=None) -> np.ndarray:
         """Implicit conversion to numpy array."""
         # Create array depending on dtype
-        if dtype == object:
-            if copy == False:
-                raise ValueError("Cannot return object array without copy, as each element has to be its own position object.")
+        if dtype is object:
+            if copy is False:
+                raise ValueError(
+                    "Cannot return object array without copy, as each element has to be its own position object."
+                )
             arr = np.array(list(self.position), dtype=object)
             # Conversion requires a copy, so copy flag will be set to True
             copy = True
@@ -200,7 +212,9 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
         return sys.getsizeof(self.position)
 
     @classmethod
-    def _from_sequence(cls, scalars, dtype=None, copy=False) -> "SkyfieldPositionExtensionArray":
+    def _from_sequence(
+        cls, scalars, dtype=None, copy=False
+    ) -> "SkyfieldPositionExtensionArray":
         if dtype:
             result = cls(scalars, frame=dtype.frame, copy=copy)
         else:
@@ -223,16 +237,20 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
 
         TODO: Not sure if this is the best (differ on boxed?)
         """
+
         def _f(x):
             if isinstance(x, positionlib.ICRF):
                 frame_name = self.dtype.frame.__name__
                 formatter = {"float_kind": lambda x: f"{x:9.3f}"}
                 position_km: str = np.array2string(x.xyz.km, formatter=formatter)
-                velocity_km_s: str = np.array2string(x.velocity.km_per_s, formatter=formatter)
+                velocity_km_s: str = np.array2string(
+                    x.velocity.km_per_s, formatter=formatter
+                )
                 t: str = x.t.utc_datetime().isoformat()
                 return f"{frame_name} position {position_km} km and velocity {velocity_km_s} km/s at time {t} with center={x.center} target={x.target}"
             else:
                 return f"{x} {self.dtype.frame}"
+
         return _f
 
     def __getitem__(self, item):
@@ -244,7 +262,9 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
         item = check_array_indexer(self, item)
 
         # Create new UnitsExtensionArray
-        result: SkyfieldPositionExtensionArray = SkyfieldPositionExtensionArray(self.position[item], frame=self.dtype.frame)
+        result: SkyfieldPositionExtensionArray = SkyfieldPositionExtensionArray(
+            self.position[item], frame=self.dtype.frame
+        )
 
         # If the result is a view, keep read-only flag
         if getitem_returns_view(self, item):
@@ -255,7 +275,9 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
     def __setitem__(self, key, value):
         raise NotImplementedError
 
-    def take(self, indices, allow_fill=False, fill_value=None) -> "SkyfieldPositionExtensionArray":
+    def take(  # noqa: F811, pre-commit complains about redefinition of take
+        self, indices, allow_fill=False, fill_value=None
+    ) -> "SkyfieldPositionExtensionArray":
         """Integer-based selection of items."""
         if allow_fill:
             if fill_value is None or np.isnan(fill_value):
@@ -263,8 +285,10 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
             else:
                 fill_value = fill_value.value
         # values = take(self.value, indices, allow_fill=allow_fill, fill_value=fill_value)
-        # TODO Skipping the whole allow_fill as not sure 
-        return SkyfieldPositionExtensionArray(self._position[indices], frame=self.dtype.frame)
+        # TODO Skipping the whole allow_fill as not sure
+        return SkyfieldPositionExtensionArray(
+            self._position[indices], frame=self.dtype.frame
+        )
 
     def isna(self):
         # TODO Can positions be NA?
@@ -278,27 +302,52 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
         # Get info about the operator
         op_name = getattr(op, "__name__", str(op))
         is_comparison = op_name in [
-            "eq", "__eq__",
-            "ne", "__ne__",
-            "lt", "__lt__",
-            "gt", "__gt__",
-            "le", "__le__",
-            "ge", "__ge__",
+            "eq",
+            "__eq__",
+            "ne",
+            "__ne__",
+            "lt",
+            "__lt__",
+            "gt",
+            "__gt__",
+            "le",
+            "__le__",
+            "ge",
+            "__ge__",
         ]
         is_equality = op_name in ["eq", "ne", "__eq__", "__ne__"]
-        is_divmod = op_name in ["divmod", "__divmod__", "rdivmod", "__rdivmod__"]
+        is_divmod = op_name in ["divmod", "__divmod__", "rdivmod", "__rdivmod__"]  # noqa: F841
         is_not_supported = op_name in [
-            "eg", "__eg__",
-            "ne", "__ne__",
-            "lt", "__lt__",
-            "gt", "__gt__",
-            "le", "__le__",
-            "ge", "__ge__",
-            "add", "__add__", "radd", "__radd__",
-            "multiply", "__mul__", "rmul",
-            "truediv", "__truediv__", "rtruediv", "__rtruediv__",
-            "floor_divide", "__floordiv__", "rfloordiv",
-            "divmod", "__divmod__", "rdivmod", "__rdivmod__",
+            "eg",
+            "__eg__",
+            "ne",
+            "__ne__",
+            "lt",
+            "__lt__",
+            "gt",
+            "__gt__",
+            "le",
+            "__le__",
+            "ge",
+            "__ge__",
+            "add",
+            "__add__",
+            "radd",
+            "__radd__",
+            "multiply",
+            "__mul__",
+            "rmul",
+            "truediv",
+            "__truediv__",
+            "rtruediv",
+            "__rtruediv__",
+            "floor_divide",
+            "__floordiv__",
+            "rfloordiv",
+            "divmod",
+            "__divmod__",
+            "rdivmod",
+            "__rdivmod__",
         ]
 
         def _invalid_operator():
@@ -322,7 +371,9 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
                         return _invalid_operator()
 
             if is_not_supported:
-                raise NotImplementedError(f"Operator {op_name} is not supported for SkyfieldPositionExtensionArray.")
+                raise NotImplementedError(
+                    f"Operator {op_name} is not supported for SkyfieldPositionExtensionArray."
+                )
             # Convert the thing to a skyfield position
             self_pos = as_position(self)
             other_pos = as_position(other)
@@ -346,6 +397,7 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
     def copy(self, deep=False) -> "SkyfieldPositionExtensionArray":
         return self.__class__(_copy_position(self.position), self.frame, copy=True)
 
+
 SkyfieldPositionExtensionArray._add_arithmetic_ops()
 # SkyfieldPositionExtensionArray._add_comparison_ops()
 
@@ -357,7 +409,9 @@ class SkyfieldPositionSeriesAccessor:
     def __init__(self, obj):
         # Inspired by fletcher
         if not isinstance(obj.array, SkyfieldPositionExtensionArray):
-            raise AttributeError("Only SkyfieldPositionExtensionArray has skyfield_position accessor.")
+            raise AttributeError(
+                "Only SkyfieldPositionExtensionArray has skyfield_position accessor."
+            )
         self._obj = obj
 
     @staticmethod
@@ -369,18 +423,20 @@ class SkyfieldPositionSeriesAccessor:
         else:
             return None
 
-    def _wrap_series(self, result, name: str = None, dtype = None) -> pd.Series:
+    def _wrap_series(self, result, name: str = None, dtype=None) -> pd.Series:
         """Construct a series with different data but same index and name."""
         if not name:
             name: str = self._obj.name
         if not dtype:
             dtype: str = self._result_dtype(result)
         return pd.Series(result, name=name, index=self._obj.index, dtype=dtype)
-    
+
     def _wrap_frame(self, result_dict: dict[str, Any]) -> pd.DataFrame:
         """Construct a DataFrame from a result dict mapping the keys to the column names and the values to the column data, with same index as the original series."""
         for key, value in result_dict.items():
-            result_dict[key] = self._wrap_series(value, name=key, dtype=self._result_dtype(value))
+            result_dict[key] = self._wrap_series(
+                value, name=key, dtype=self._result_dtype(value)
+            )
         return pd.DataFrame(result_dict)
 
     @property
@@ -407,7 +463,7 @@ class SkyfieldPositionSeriesAccessor:
     def subpoint(self) -> toposlib.GeographicPosition:
         """Calculate the subpoint of the position."""
         return sf.wgs84.subpoint_of(self.position)
-    
+
     @property
     def time(self) -> datetime.datetime:
         """The time of the position."""
@@ -422,7 +478,9 @@ class SkyfieldPositionSeriesAccessor:
     @property
     def length(self) -> pd.Series:
         """The length of the position vector."""
-        return self._wrap_series(self.position.xyz.length().to(config.length_unit), name="length")
+        return self._wrap_series(
+            self.position.xyz.length().to(config.length_unit), name="length"
+        )
 
     @property
     def velocity(self) -> pd.DataFrame:
@@ -433,11 +491,13 @@ class SkyfieldPositionSeriesAccessor:
     @property
     def speed(self) -> pd.Series:
         """The speed of the position vector."""
-        return self._wrap_series(self.position.speed().to(config.velocity_unit), name="speed")
+        return self._wrap_series(
+            self.position.speed().to(config.velocity_unit), name="speed"
+        )
 
     def altaz(self) -> pd.DataFrame:
         """The (alt, az, distance) of the position relative to the observer's horizon as a DataFrame.
-        
+
         Raises
         ------
         ValueError
@@ -447,11 +507,13 @@ class SkyfieldPositionSeriesAccessor:
             msg: str = f"Cannot calculate altaz for positions with center {self.center}. altaz() is only possible for positions relative to an observer."
             raise ValueError(msg)
         altitude, azimuth, distance = self.position.altaz()
-        return self._wrap_frame({
-            "altitude": altitude.to(config.angle_unit),
-            "azimuth": azimuth.to(config.angle_unit),
-            "distance": distance.to(config.length_unit),
-        })
+        return self._wrap_frame(
+            {
+                "altitude": altitude.to(config.angle_unit),
+                "azimuth": azimuth.to(config.angle_unit),
+                "distance": distance.to(config.length_unit),
+            }
+        )
 
     def frame_xyz_and_velocity(self, frame: Frame) -> pd.DataFrame:
         """Converts the position to the given frames and returns the position and velocity in this frame as DataFrame.
@@ -469,11 +531,16 @@ class SkyfieldPositionSeriesAccessor:
         distance, velocity = self.position.frame_xyz_and_velocity(frame)
         x, y, z = distance.to(config.length_unit)
         vx, vy, vz = velocity.to(config.velocity_unit)
-        return self._wrap_frame({
-            "x": x, "y": y, "z": z,
-            "vx": vx, "vy": vy, "vz": vz,
-        })
-
+        return self._wrap_frame(
+            {
+                "x": x,
+                "y": y,
+                "z": z,
+                "vx": vx,
+                "vy": vy,
+                "vz": vz,
+            }
+        )
 
     def __getattr__(self, name):
         """Delegate attribute access to the position object."""
@@ -490,17 +557,18 @@ class SkyfieldPositionSeriesAccessor:
         pd.DataFrame
             A DataFrame containing the time of the position, x, y and z coordinates and vx, vy and vz velocities, length and speed.
         """
-        return pd.concat([
+        return pd.concat(
+            [
                 self.time,
                 self.xyz,
                 self.velocity,
                 self.length,
                 self.speed,
             ],
-            axis=1
+            axis=1,
         )
 
-    def to_geodataframe(self) -> "gpd.GeoDataFrame":
+    def to_geodataframe(self) -> "gpd.GeoDataFrame":  # noqa: F821
         """Create a GeoDataFrame with the position's subpoint as geometry and the time, x, y, z components, length, velocity components and speed as columns.
 
         Returns
@@ -517,12 +585,14 @@ class SkyfieldPositionSeriesAccessor:
         try:
             import geopandas as gpd
         except ImportError:
-            msg: str = f"Optional geopandas dependency not installed, cannot convert to GeoDataFrame. Please install geopandas to use this feature."
+            msg: str = "Optional geopandas dependency not installed, cannot convert to GeoDataFrame. Please install geopandas to use this feature."
             raise ImportError(msg)
 
         # Get subpoint of position in WGS 84 and create GeoPandas geometry from that
         subpoint: toposlib.GeographicPosition = self.subpoint
-        geometry = gpd.points_from_xy(subpoint.longitude.to(u.deg), subpoint.latitude.to(u.deg))
+        geometry = gpd.points_from_xy(
+            subpoint.longitude.to(u.deg), subpoint.latitude.to(u.deg)
+        )
 
         # Get position DataFrame and convert to GeoDataFrame
         df: pd.DataFrame = self.to_astropy_dataframe()

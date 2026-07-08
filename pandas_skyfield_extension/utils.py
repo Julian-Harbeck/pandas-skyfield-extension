@@ -11,7 +11,7 @@ from skyfield import (
 
 from pandas_skyfield_extension.position_extension import SkyfieldPositionExtensionArray
 from pandas_skyfield_extension.sf_converters import to_sf_time
-from pandas_skyfield_extension.typing import Frame
+from pandas_skyfield_extension.typing import Frame  # noqa: F401
 
 
 def sf_position_to_series(position: positionlib.ICRF, **kwargs) -> pd.Series:
@@ -32,7 +32,13 @@ def sf_position_to_series(position: positionlib.ICRF, **kwargs) -> pd.Series:
     return pd.Series(SkyfieldPositionExtensionArray(position), **kwargs)
 
 
-def at(obj: vectorlib.VectorFunction, times: Any, set_datetime_idx: bool = True, ts: sf.Timescale | None = None, **kwargs) -> pd.Series:
+def at(
+    obj: vectorlib.VectorFunction,
+    times: Any,
+    set_datetime_idx: bool = True,
+    ts: sf.Timescale | None = None,
+    **kwargs,
+) -> pd.Series:
     """Calculate the position of the object at the given times and return it as a pandas Series.
 
     Parameters
@@ -70,7 +76,9 @@ def at(obj: vectorlib.VectorFunction, times: Any, set_datetime_idx: bool = True,
 
     # If name of the resulting series is not provided, try to infer it from the object
     if "name" not in kwargs:
-        name: str = getattr(obj, "name", None) or getattr(obj, "target_name", None) or None
+        name: str = (
+            getattr(obj, "name", None) or getattr(obj, "target_name", None) or None
+        )
         if name:
             kwargs["name"] = f"{name}"
 

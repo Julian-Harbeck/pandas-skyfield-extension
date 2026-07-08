@@ -11,7 +11,9 @@ from pandas.api.types import is_list_like
 
 def _is_UnitsDtype_of_physical_type(dtype: Any, physical_type: str) -> bool:
     """Check if the dtype is a UnitsDtype of the specified physical type."""
-    return isinstance(dtype, pue.UnitsDtype) and dtype.unit.physical_type == physical_type
+    return (
+        isinstance(dtype, pue.UnitsDtype) and dtype.unit.physical_type == physical_type
+    )
 
 
 def to_sf_time(times, ts: sf.Timescale | None = None) -> sf.Time:
@@ -63,13 +65,15 @@ def to_sf_angle(obj: Any) -> sf.Angle:
     # If the object is already an Angle, return it as is
     if isinstance(obj, sf.Angle):
         return obj
-    
+
     # If the object is a Series with UnitsDtype of physical type angle, convert to Angle using the values and units otherwise just values
     elif isinstance(obj, pd.Series):
         if _is_UnitsDtype_of_physical_type(obj.dtype, u.physical.angle):
-            return sf.Angle(radians=obj.array.to_quantity().to_value(u.rad)) # TODO replace with units.to_quantity()
+            return sf.Angle(
+                radians=obj.array.to_quantity().to_value(u.rad)
+            )  # TODO replace with units.to_quantity()
         return sf.Angle(radians=obj.values)
-    
+
     # If the object is a DataFrame with 3 columns, assume it's x, y, z and convert to Distance
     elif isinstance(obj, pd.DataFrame):
         # Convert each Series to Angle and then combine into a single Angle object
@@ -78,14 +82,16 @@ def to_sf_angle(obj: Any) -> sf.Angle:
 
         # Convert the columns to Angle using the values
         return sf.Angle(radians=obj.T.values)
-    
+
     elif isinstance(obj, u.Quantity):
         return sf.Angle(radians=obj.to_value(u.rad))
 
     try:
         return sf.Angle(radians=obj)
     except (TypeError, ValueError) as e:
-        raise ValueError(f"Cannot convert object of type {type(obj)} to a Skyfield Angle.\n{e}")
+        raise ValueError(
+            f"Cannot convert object of type {type(obj)} to a Skyfield Angle.\n{e}"
+        )
 
 
 def to_sf_distance(obj: Any) -> sf.Distance:
@@ -108,7 +114,9 @@ def to_sf_distance(obj: Any) -> sf.Distance:
     # If the object is a Series with UnitsDtype of physical type length, convert to Distance using the values and units otherwise just values
     elif isinstance(obj, pd.Series):
         if _is_UnitsDtype_of_physical_type(obj.dtype, u.physical.length):
-            return sf.Distance(obj.array.to_quantity().to_value(u.au)) # TODO replace with units.to_quantity()
+            return sf.Distance(
+                obj.array.to_quantity().to_value(u.au)
+            )  # TODO replace with units.to_quantity()
         return sf.Distance(obj.values)
 
     # If the object is a DataFrame with 3 columns, assume it's x, y, z and convert to Distance
@@ -126,7 +134,9 @@ def to_sf_distance(obj: Any) -> sf.Distance:
     try:
         return sf.Distance(obj)
     except (TypeError, ValueError) as e:
-        raise ValueError(f"Cannot convert object of type {type(obj)} to a Skyfield Distance.\n{e}")
+        raise ValueError(
+            f"Cannot convert object of type {type(obj)} to a Skyfield Distance.\n{e}"
+        )
 
 
 def to_sf_velocity(obj: Any) -> sf.Velocity:
@@ -149,7 +159,9 @@ def to_sf_velocity(obj: Any) -> sf.Velocity:
     # If the object is a Series with UnitsDtype of physical type velocity, convert to Velocity using the values and units otherwise just values
     elif isinstance(obj, pd.Series):
         if _is_UnitsDtype_of_physical_type(obj.dtype, u.physical.velocity):
-            return sf.Velocity(obj.array.to_quantity().to_value(u.au / u.day)) # TODO replace with units.to_quantity()
+            return sf.Velocity(
+                obj.array.to_quantity().to_value(u.au / u.day)
+            )  # TODO replace with units.to_quantity()
         return sf.Velocity(obj.values)
 
     # If the object is a DataFrame with 3 columns, assume it's vx, vy, vz and convert to Velocity
@@ -167,4 +179,6 @@ def to_sf_velocity(obj: Any) -> sf.Velocity:
     try:
         return sf.Velocity(obj)
     except (TypeError, ValueError) as e:
-        raise ValueError(f"Cannot convert object of type {type(obj)} to a Skyfield Velocity.\n{e}")
+        raise ValueError(
+            f"Cannot convert object of type {type(obj)} to a Skyfield Velocity.\n{e}"
+        )

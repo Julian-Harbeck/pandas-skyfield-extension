@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 import astropy.units as u
 
+
 def _verify_unit(obj: Any, expected_physical_type: u.PhysicalType | str) -> None:
     """Verify that an object is a astropy Unit of an expected physical type.
 
@@ -21,7 +22,10 @@ def _verify_unit(obj: Any, expected_physical_type: u.PhysicalType | str) -> None
     if not isinstance(obj, (u.UnitBase)):
         raise ValueError(f"Got instance of type {type(obj)} instead of type 'Unit'")
     if obj.physical_type != expected_physical_type:
-        raise ValueError(f"Got Unit with physical type {obj.physical_type} instead of {expected_physical_type}")
+        raise ValueError(
+            f"Got Unit with physical type {obj.physical_type} instead of {expected_physical_type}"
+        )
+
 
 class Config:
     """Configuration class for the pandas_skyfield_extension package."""
@@ -91,30 +95,23 @@ Distance, Velocity and Angle objects to astropy.
 """
 
 
-
-
-
-
-
-
-
-
-
-
 _LENGTH_UNIT: u.Unit = u.km
 _VELOCITY_UNIT: u.Unit = u.km / u.s
+
 
 def set_standard_length_unit(unit: u.Unit) -> None:
     global _LENGTH_UNIT
     _LENGTH_UNIT = unit
 
+
 def get_standard_length_unit() -> u.Unit:
     return _LENGTH_UNIT
+
 
 def set_standard_velocity_unit(unit: u.Unit) -> None:
     global _VELOCITY_UNIT
     _VELOCITY_UNIT = unit
 
+
 def get_standard_velocity_unit() -> u.Unit:
     return _VELOCITY_UNIT
-
