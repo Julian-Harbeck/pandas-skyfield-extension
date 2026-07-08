@@ -11,8 +11,13 @@ dependencies = [
     "astropy",
     "pandas>=3.0.1",
     "skyfield",
-#    "pandas-units-extension>=0.2.0"
+    "pandas-units-extension>=0.2.0"
 ]
 
 [project.optional-dependencies]
 geo = ["geopandas[all]"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
