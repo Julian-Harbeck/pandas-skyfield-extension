@@ -67,7 +67,7 @@ class Config:
             New standard velocity unit, must be of physical type velocity.
         """
         _verify_unit(new_velocity_unit, u.physical.velocity)
-        self._length_unit = new_velocity_unit
+        self._velocity_unit = new_velocity_unit
 
     @property
     def angle_unit(self) -> u.Unit[u.physical.angle]:
@@ -84,7 +84,7 @@ class Config:
             New standard angle unit, must be of physical type angle.
         """
         _verify_unit(new_angle_unit, u.physical.angle)
-        self._length_unit = new_angle_unit
+        self._angle_unit = new_angle_unit
 
 
 config: Config = Config(u.km, u.km / u.s, u.deg)
