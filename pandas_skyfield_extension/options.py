@@ -93,25 +93,3 @@ config: Config = Config(u.km, u.km / u.s, u.deg)
 Use this object to set the standard astropy units used to convert the Skyfield
 Distance, Velocity and Angle objects to astropy.
 """
-
-
-_LENGTH_UNIT: u.Unit = u.km
-_VELOCITY_UNIT: u.Unit = u.km / u.s
-
-
-def set_standard_length_unit(unit: u.Unit) -> None:
-    global _LENGTH_UNIT
-    _LENGTH_UNIT = unit
-
-
-def get_standard_length_unit() -> u.Unit:
-    return _LENGTH_UNIT
-
-
-def set_standard_velocity_unit(unit: u.Unit) -> None:
-    global _VELOCITY_UNIT
-    _VELOCITY_UNIT = unit
-
-
-def get_standard_velocity_unit() -> u.Unit:
-    return _VELOCITY_UNIT
