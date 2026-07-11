@@ -2,21 +2,21 @@ import astropy.units as u
 import pytest
 
 import pandas_skyfield_extension as psfe
-from pandas_skyfield_extension.options import _verify_unit
+from pandas_skyfield_extension.options import _verify_unit, Config
 
 
 @pytest.fixture
-def config() -> psfe.Config:
+def config() -> Config:
     return psfe.config
 
 
 @pytest.fixture(params=["length_unit", "velocity_unit", "angle_unit"])
-def config_attr(request):
+def config_attr(request) -> str:
     return request.param
 
 
 @pytest.fixture
-def config_physical_type(config_attr):
+def config_physical_type(config_attr) -> u.physical.PhysicalType:
     return {
         "length_unit": u.physical.length,
         "velocity_unit": u.physical.velocity,
@@ -25,7 +25,7 @@ def config_physical_type(config_attr):
 
 
 @pytest.fixture
-def config_default_unit(config_attr):
+def config_default_unit(config_attr) -> u.UnitBase:
     return {
         "length_unit": u.km,
         "velocity_unit": u.km / u.s,
