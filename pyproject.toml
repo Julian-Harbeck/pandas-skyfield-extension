@@ -20,8 +20,17 @@ geo = ["geopandas[all]>=1.0.0"]
 all = ["pandas-skyfield-extension[geo]"]
 
 [dependency-groups]
+dev = [
+    {include-group = "test-base"},
+    {include-group = "typing"},
+    "geopandas[all]>=1.0.0",
+]
 test-base = ["pytest>=9.1.1"]
-typing = ["pre-commit>=4.2.0", "mypy==2.1.0"]
+typing = [
+    "pre-commit>=4.2.0",
+    "mypy==2.1.0",
+]
+
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
@@ -33,21 +42,12 @@ platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
 conda-forge = { mapping = { pandas = false } }
 
 
-# Features of packages with a nightly variant
-# [feature.pandas.dependencies]
-# pandas = ">=3.0.5"
-
+# Nightly variant features of core packages
 [tool.pixi.feature.pandas-nightly.pypi-dependencies]
 pandas = { version = ">=3.1.0.dev0", index = "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple" }
 
-# [feature.pue.pypi-dependencies]
-# pandas-units-extension = ">=0.2.1"
-
 [tool.pixi.feature.pue-nightly.pypi-dependencies]
 pandas-units-extension = { git = "https://github.com/janpipek/pandas-units-extension" }
-
-# [feature.skyfield.dependencies]
-# skyfield = ">=1.54"
 
 [tool.pixi.feature.skyfield-nightly.pypi-dependencies]
 skyfield = { git = "https://github.com/skyfielders/python-skyfield/" }
@@ -65,19 +65,11 @@ python = "3.13.*"
 [tool.pixi.feature.py314.dependencies]
 python = "3.14.*"
 
-# Other features
-# [tool.pixi.feature.optional-dependencies.dependencies]
-# geopandas = ">=1.0.0"
-
-# [tool.pixi.feature.test-base.dependencies]
-# pytest = ">=9.1.1"
-
+# Minimum versions creates environment with all direct dependencies at their lowest
+# specified version
 [tool.pixi.feature.minimum-versions]
 solve-strategy = "lowest-direct"
 
-# [tool.pixi.feature.typing.dependencies]
-# pre-commit = ">=4.2.0"
-# mypy = "==2.1.0"
 
 [tool.pixi.environments]
 py311 = { features = ["py311", "test-base", "all"] }
@@ -90,6 +82,7 @@ pandas-nightly = { features = ["py314", "pandas-nightly", "test-base"] }
 pue-nightly = { features = ["py314", "pue-nightly", "test-base"] }
 skyfield-nightly = { features = ["py314", "skyfield-nightly", "test-base"] }
 typing = { features = ["py314", "test-base", "all", "typing"] }
+
 
 [tool.pixi.tasks]
 [tool.pixi.tasks.tests]
