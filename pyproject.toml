@@ -77,7 +77,7 @@ py312 = { features = ["py312", "test-base", "all"] }
 py313 = { features = ["py313", "test-base", "all"] }
 py314 = { features = ["py314", "test-base", "all"] }
 no-optional = { features = ["py314", "test-base"] }
-minimum-versions = { features = ["py311", "all", "minimum-versions"] }
+minimum-versions = { features = ["py311", "test-base", "all", "minimum-versions"] }
 pandas-nightly = { features = ["py314", "pandas-nightly", "test-base"] }
 pue-nightly = { features = ["py314", "pue-nightly", "test-base"] }
 skyfield-nightly = { features = ["py314", "skyfield-nightly", "test-base"] }
