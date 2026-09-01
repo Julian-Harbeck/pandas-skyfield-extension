@@ -8,16 +8,96 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "astropy",
-    "pandas>=3.0.1",
-    "skyfield",
-    "pandas-units-extension>=0.2.0"
+    "astropy>=8.0.1",
+    "pandas>=3.0.5",
+    "pandas-units-extension>=0.2.1",
+    "numpy>=2.2.0",
+    "skyfield>=1.54",
 ]
 
 [project.optional-dependencies]
-geo = ["geopandas[all]"]
+geo = ["geopandas[all]>=1.0.0"]
+all = ["pandas-skyfield-extension[geo]"]
 
 [dependency-groups]
 dev = [
-    "pytest>=9.1.1",
+    {include-group = "test-base"},
+    {include-group = "typing"},
+    "geopandas[all]>=1.0.0",
 ]
+test-base = ["pytest>=9.1.1"]
+typing = [
+    "pre-commit>=4.2.0",
+    "mypy==2.1.0",
+]
+
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
+
+# Needed for conflicts between pandas-nightly and the pandas dependency of 
+# pandas-units-extension which is solved first, otherwise will not update to nightly
+[tool.pixi.workspace.conda-pypi-map]
+conda-forge = { mapping = { pandas = false } }
+
+
+# Nightly variant features of core packages
+[tool.pixi.feature.pandas-nightly.pypi-dependencies]
+pandas = { version = ">=3.1.0.dev0", index = "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple" }
+
+[tool.pixi.feature.pue-nightly.pypi-dependencies]
+pandas-units-extension = { git = "https://github.com/janpipek/pandas-units-extension" }
+
+[tool.pixi.feature.skyfield-nightly.pypi-dependencies]
+skyfield = { git = "https://github.com/skyfielders/python-skyfield/" }
+
+# Python versions
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+
+[tool.pixi.feature.py313.dependencies]
+python = "3.13.*"
+
+[tool.pixi.feature.py314.dependencies]
+python = "3.14.*"
+
+# Minimum versions creates environment with all direct dependencies at their lowest
+# specified version
+[tool.pixi.feature.minimum-versions]
+solve-strategy = "lowest-direct"
+
+# pyproj and proj dependencies needed for MacOS
+[tool.pixi.feature.proj]
+# keep the feature enabled where needed, but only install these packages on macOS
+# "osx-*" should match osx-64 and osx-arm64
+[tool.pixi.feature.proj.target."osx-*".dependencies]
+proj = "*"
+pyproj = "*"
+
+
+[tool.pixi.environments]
+py311 = { features = ["py311", "test-base", "all", "proj"] }
+py312 = { features = ["py312", "test-base", "all", "proj"] }
+py313 = { features = ["py313", "test-base", "all", "proj"] }
+py314 = { features = ["py314", "test-base", "all", "proj"] }
+no-optional = { features = ["py314", "test-base"] }
+minimum-versions = { features = ["py311", "test-base", "all", "proj", "minimum-versions"] }
+pandas-nightly = { features = ["py314", "pandas-nightly", "test-base"] }
+pue-nightly = { features = ["py314", "pue-nightly", "test-base"] }
+skyfield-nightly = { features = ["py314", "skyfield-nightly", "test-base"] }
+typing = { features = ["py314", "test-base", "all", "typing"] }
+
+
+[tool.pixi.tasks]
+[tool.pixi.tasks.tests]
+cmd = "pytest {{ target }}"
+args = [{ arg = "target", default = "tests/" }]
+default-environment = "py314"
+
+[tool.pixi.tasks.typing]
+cmd = "pre-commit run"
+default-environment = "typing"
