@@ -16,7 +16,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-geo = ["geopandas[all]>=1.0.0"]
+geo = [
+    "geopandas[all]>=1.0.0",
+    # pyproj and proj not needed directly, but for build under MacOS
+    "pyproj>=3.7.0",
+    "proj"
+]
 all = ["pandas-skyfield-extension[geo]"]
 
 [dependency-groups]
