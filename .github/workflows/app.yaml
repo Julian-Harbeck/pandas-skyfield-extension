@@ -35,6 +35,10 @@ jobs:
           pixi-version: v0.78.0
           cache: true
           environments: ${{ matrix.environment }}
+          # Need to use unlocked and frozen because of different index for pandas dependency
+          # and pandas-nightly, see https://github.com/prefix-dev/pixi/issues/6834
+          locked: false
+          frozen: true
 
       - name: Run pytest
         run: pixi run -e ${{ matrix.environment }} tests
