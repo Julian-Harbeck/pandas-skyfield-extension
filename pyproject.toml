@@ -16,12 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-geo = [
-    "geopandas[all]>=1.0.0",
-    # pyproj and proj not needed directly, but for build under MacOS
-    "pyproj>=3.7.0",
-    "proj"
-]
+geo = ["geopandas[all]>=1.0.0"]
 all = ["pandas-skyfield-extension[geo]"]
 
 [dependency-groups]
@@ -75,14 +70,22 @@ python = "3.14.*"
 [tool.pixi.feature.minimum-versions]
 solve-strategy = "lowest-direct"
 
+# pyproj and proj dependencies needed for MacOS
+[tool.pixi.feature.proj]
+# keep the feature enabled where needed, but only install these packages on macOS
+# "osx-*" should match osx-64 and osx-arm64
+[tool.pixi.feature.proj.target."osx-*".dependencies]
+proj = "*"
+pyproj = "*"
+
 
 [tool.pixi.environments]
-py311 = { features = ["py311", "test-base", "all"] }
-py312 = { features = ["py312", "test-base", "all"] }
-py313 = { features = ["py313", "test-base", "all"] }
-py314 = { features = ["py314", "test-base", "all"] }
+py311 = { features = ["py311", "test-base", "all", "proj"] }
+py312 = { features = ["py312", "test-base", "all", "proj"] }
+py313 = { features = ["py313", "test-base", "all", "proj"] }
+py314 = { features = ["py314", "test-base", "all", "proj"] }
 no-optional = { features = ["py314", "test-base"] }
-minimum-versions = { features = ["py311", "test-base", "all", "minimum-versions"] }
+minimum-versions = { features = ["py311", "test-base", "all", "proj", "minimum-versions"] }
 pandas-nightly = { features = ["py314", "pandas-nightly", "test-base"] }
 pue-nightly = { features = ["py314", "pue-nightly", "test-base"] }
 skyfield-nightly = { features = ["py314", "skyfield-nightly", "test-base"] }
