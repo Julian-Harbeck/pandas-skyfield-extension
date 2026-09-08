@@ -900,7 +900,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e6/9c/4ffaa1dbfc4d19bf5403eb1279d9a989a2cdff0179ff0ff7ab3221ce2552/pandas_units_extension-0.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/fa/14/6f4427419f8a02e1d0a885fb64d8d4454c5d443627aa7cb1a3a36e16abb7/astropy-8.0.1-cp311-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
-      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
       linux-aarch64:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-20_gnu.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/bzip2-1.0.8-h4777abc_10.conda
@@ -944,7 +944,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e6/9c/4ffaa1dbfc4d19bf5403eb1279d9a989a2cdff0179ff0ff7ab3221ce2552/pandas_units_extension-0.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl
-      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl
+      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python_abi-3.14-8_cp314.conda
@@ -982,7 +982,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e6/9c/4ffaa1dbfc4d19bf5403eb1279d9a989a2cdff0179ff0ff7ab3221ce2552/pandas_units_extension-0.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl
-      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-macosx_10_15_x86_64.whl
+      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-macosx_10_15_x86_64.whl
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python_abi-3.14-8_cp314.conda
@@ -1021,7 +1021,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e6/9c/4ffaa1dbfc4d19bf5403eb1279d9a989a2cdff0179ff0ff7ab3221ce2552/pandas_units_extension-0.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl
-      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-macosx_11_0_arm64.whl
+      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-macosx_11_0_arm64.whl
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-h4c7d964_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python_abi-3.14-8_cp314.conda
@@ -1062,7 +1062,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e6/9c/4ffaa1dbfc4d19bf5403eb1279d9a989a2cdff0179ff0ff7ab3221ce2552/pandas_units_extension-0.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ec/6a/8534fd98e2d3eb51cbaa261e6c6b59e4ad969a1787d72bb1208499080dbd/astropy-8.0.1-cp311-abi3-win_amd64.whl
-      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-win_amd64.whl
+      - pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-win_amd64.whl
   pue-nightly:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -16266,9 +16266,9 @@ packages:
   - pytest-xdist ; extra == 'test-no-images'
   - wurlitzer ; extra == 'test-no-images'
   requires_python: '>=3.11'
-- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-macosx_10_15_x86_64.whl
+- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-macosx_10_15_x86_64.whl
   name: pandas
-  version: 3.1.0.dev0+1717.g6de181b121
+  version: 3.1.0.dev0+1810.g7ea7ede82c
   index: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
   requires_dist:
   - numpy>=2.0.2 ; python_full_version < '3.14'
@@ -16281,7 +16281,7 @@ packages:
   - pyarrow>=16.0.0 ; extra == 'pyarrow'
   - bottleneck>=1.5.0 ; extra == 'performance'
   - numba>=0.61.2 ; extra == 'performance'
-  - numexpr>=2.11.0 ; extra == 'performance'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'performance'
   - scipy>=1.16.1 ; extra == 'computation'
   - xarray>=2025.7.1 ; extra == 'computation'
   - fsspec>=2025.7.0 ; extra == 'fss'
@@ -16329,7 +16329,7 @@ packages:
   - lxml>=6.0.0 ; extra == 'all'
   - matplotlib>=3.10.5 ; extra == 'all'
   - numba>=0.61.2 ; extra == 'all'
-  - numexpr>=2.11.0 ; extra == 'all'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'all'
   - odfpy>=1.4.1 ; extra == 'all'
   - openpyxl>=3.1.5 ; extra == 'all'
   - psycopg2>=2.9.10 ; extra == 'all'
@@ -16354,9 +16354,9 @@ packages:
   - xlsxwriter>=3.2.5 ; extra == 'all'
   - zstandard>=0.23.0 ; extra == 'all'
   requires_python: '>=3.11'
-- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-macosx_11_0_arm64.whl
+- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-macosx_11_0_arm64.whl
   name: pandas
-  version: 3.1.0.dev0+1717.g6de181b121
+  version: 3.1.0.dev0+1810.g7ea7ede82c
   index: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
   requires_dist:
   - numpy>=2.0.2 ; python_full_version < '3.14'
@@ -16369,7 +16369,7 @@ packages:
   - pyarrow>=16.0.0 ; extra == 'pyarrow'
   - bottleneck>=1.5.0 ; extra == 'performance'
   - numba>=0.61.2 ; extra == 'performance'
-  - numexpr>=2.11.0 ; extra == 'performance'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'performance'
   - scipy>=1.16.1 ; extra == 'computation'
   - xarray>=2025.7.1 ; extra == 'computation'
   - fsspec>=2025.7.0 ; extra == 'fss'
@@ -16417,7 +16417,7 @@ packages:
   - lxml>=6.0.0 ; extra == 'all'
   - matplotlib>=3.10.5 ; extra == 'all'
   - numba>=0.61.2 ; extra == 'all'
-  - numexpr>=2.11.0 ; extra == 'all'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'all'
   - odfpy>=1.4.1 ; extra == 'all'
   - openpyxl>=3.1.5 ; extra == 'all'
   - psycopg2>=2.9.10 ; extra == 'all'
@@ -16442,9 +16442,9 @@ packages:
   - xlsxwriter>=3.2.5 ; extra == 'all'
   - zstandard>=0.23.0 ; extra == 'all'
   requires_python: '>=3.11'
-- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl
+- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl
   name: pandas
-  version: 3.1.0.dev0+1717.g6de181b121
+  version: 3.1.0.dev0+1810.g7ea7ede82c
   index: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
   requires_dist:
   - numpy>=2.0.2 ; python_full_version < '3.14'
@@ -16457,7 +16457,7 @@ packages:
   - pyarrow>=16.0.0 ; extra == 'pyarrow'
   - bottleneck>=1.5.0 ; extra == 'performance'
   - numba>=0.61.2 ; extra == 'performance'
-  - numexpr>=2.11.0 ; extra == 'performance'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'performance'
   - scipy>=1.16.1 ; extra == 'computation'
   - xarray>=2025.7.1 ; extra == 'computation'
   - fsspec>=2025.7.0 ; extra == 'fss'
@@ -16505,7 +16505,7 @@ packages:
   - lxml>=6.0.0 ; extra == 'all'
   - matplotlib>=3.10.5 ; extra == 'all'
   - numba>=0.61.2 ; extra == 'all'
-  - numexpr>=2.11.0 ; extra == 'all'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'all'
   - odfpy>=1.4.1 ; extra == 'all'
   - openpyxl>=3.1.5 ; extra == 'all'
   - psycopg2>=2.9.10 ; extra == 'all'
@@ -16530,9 +16530,9 @@ packages:
   - xlsxwriter>=3.2.5 ; extra == 'all'
   - zstandard>=0.23.0 ; extra == 'all'
   requires_python: '>=3.11'
-- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
   name: pandas
-  version: 3.1.0.dev0+1717.g6de181b121
+  version: 3.1.0.dev0+1810.g7ea7ede82c
   index: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
   requires_dist:
   - numpy>=2.0.2 ; python_full_version < '3.14'
@@ -16545,7 +16545,7 @@ packages:
   - pyarrow>=16.0.0 ; extra == 'pyarrow'
   - bottleneck>=1.5.0 ; extra == 'performance'
   - numba>=0.61.2 ; extra == 'performance'
-  - numexpr>=2.11.0 ; extra == 'performance'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'performance'
   - scipy>=1.16.1 ; extra == 'computation'
   - xarray>=2025.7.1 ; extra == 'computation'
   - fsspec>=2025.7.0 ; extra == 'fss'
@@ -16593,7 +16593,7 @@ packages:
   - lxml>=6.0.0 ; extra == 'all'
   - matplotlib>=3.10.5 ; extra == 'all'
   - numba>=0.61.2 ; extra == 'all'
-  - numexpr>=2.11.0 ; extra == 'all'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'all'
   - odfpy>=1.4.1 ; extra == 'all'
   - openpyxl>=3.1.5 ; extra == 'all'
   - psycopg2>=2.9.10 ; extra == 'all'
@@ -16618,9 +16618,9 @@ packages:
   - xlsxwriter>=3.2.5 ; extra == 'all'
   - zstandard>=0.23.0 ; extra == 'all'
   requires_python: '>=3.11'
-- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1717.g6de181b121/pandas-3.1.0.dev0+1717.g6de181b121-cp314-cp314-win_amd64.whl
+- pypi: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple/pandas/3.1.0.dev0+1810.g7ea7ede82c/pandas-3.1.0.dev0+1810.g7ea7ede82c-cp314-cp314-win_amd64.whl
   name: pandas
-  version: 3.1.0.dev0+1717.g6de181b121
+  version: 3.1.0.dev0+1810.g7ea7ede82c
   index: https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
   requires_dist:
   - numpy>=2.0.2 ; python_full_version < '3.14'
@@ -16633,7 +16633,7 @@ packages:
   - pyarrow>=16.0.0 ; extra == 'pyarrow'
   - bottleneck>=1.5.0 ; extra == 'performance'
   - numba>=0.61.2 ; extra == 'performance'
-  - numexpr>=2.11.0 ; extra == 'performance'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'performance'
   - scipy>=1.16.1 ; extra == 'computation'
   - xarray>=2025.7.1 ; extra == 'computation'
   - fsspec>=2025.7.0 ; extra == 'fss'
@@ -16681,7 +16681,7 @@ packages:
   - lxml>=6.0.0 ; extra == 'all'
   - matplotlib>=3.10.5 ; extra == 'all'
   - numba>=0.61.2 ; extra == 'all'
-  - numexpr>=2.11.0 ; extra == 'all'
+  - numexpr>=2.11.0,!=2.14.1 ; extra == 'all'
   - odfpy>=1.4.1 ; extra == 'all'
   - openpyxl>=3.1.5 ; extra == 'all'
   - psycopg2>=2.9.10 ; extra == 'all'
