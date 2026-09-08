@@ -11,30 +11,7 @@ This library is currently not on PyPi or conda-forge available, installation the
 
 With pip:
 ```bash
-pip install git+https://github.com/Julian-Harbeck/pandas-units-extension.git@dev
 pip install git+https://github.com/Julian-Harbeck/pandas-skyfield-extension.git
-```
-
-With conda, will create the `pandas_skyfield_extension` conda environment:
-```bash
-conda env create -f environment.yml 
-```
-
-### For development
-
-From a clone of this repository to install it in editable mode.
-
-With pip:
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install git+https://github.com/Julian-Harbeck/pandas-units-extension.git@dev
-pip install -e .
-```
-
-Or to create the `pandas_skyfield_extension_dev` conda environment:
-```bash
-conda env create -f environment_dev.yml 
 ```
 
 ### Optional Dependencies
@@ -43,6 +20,45 @@ Optionally the library [GeoPandas](https://github.com/geopandas/geopandas) may b
 
 ```bash
 pip install geopandas[all]
+```
+
+### For development
+
+For development it is recommended to use `pixi`, there are multiple environments available.
+
+#### Environments
+To install all of them use:
+```bash
+pixi install
+```
+To show all environments and their included packages use:
+```bash
+pixi info
+```
+To install only one of them use the `-e` flag, e.g. to only install the Python 3.14 environment:
+```bash
+pixi install -e py314
+```
+
+#### Testing
+To run the complete test suite defined in [tests](tests/):
+```bash
+pixi run tests
+```
+By default this runs in the newest Python version, but can be run on other environments with an `-e` flag:
+```bash
+pixi run -e pandas-nightly tests
+```
+To run only certain tests either specify the path or use the pytest `-k` flag, pytest arguments need to be separated by a double dash `--`:
+```bash
+pixi run tests tests/test_sf_converters.py::TestToSfTime             # Only runs tests of the TestToSfTime class
+pixi run tests tests/test_sf_converters.py -- -k test_series_scalar  # Run all test matching expression
+```
+
+#### Formatting
+To run `pre-commit` to auto-format staged files run:
+```bash
+pixi run typing
 ```
 
 
@@ -134,4 +150,4 @@ Based on the Astropy extension array this package was developed by Julian Harbec
 ## Links
 
 - <https://rhodesmill.org/skyfield/api.html>
-- <https://github.com/Julian-Harbeck/pandas-units-extension/tree/dev> - Pandas extension for Astropy Quantity objects
+- <https://github.com/janpipek/pandas-units-extension> - Pandas extension for Astropy Quantity objects
