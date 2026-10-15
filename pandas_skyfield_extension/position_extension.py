@@ -188,7 +188,7 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
     def __array__(self, dtype=object, copy=None) -> np.ndarray:
         """Implicit conversion to numpy array."""
         # Create array depending on dtype
-        if dtype is object:
+        if dtype in [object, np.dtype(object)]:
             if copy is False:
                 raise ValueError(
                     "Cannot return object array without copy, as each element has to be its own position object."
@@ -261,7 +261,7 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
         # Use pandas utility function to check and convert the item to a valid indexer
         item = check_array_indexer(self, item)
 
-        # Create new UnitsExtensionArray
+        # Create new SkyfieldPositionExtensionArray
         result: SkyfieldPositionExtensionArray = SkyfieldPositionExtensionArray(
             self.position[item], frame=self.dtype.frame
         )
