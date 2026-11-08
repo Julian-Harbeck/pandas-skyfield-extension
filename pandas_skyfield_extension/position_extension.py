@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import re
 import sys
-from typing import Any
+from typing import Any, Self, Sequence
 import warnings
 
 import astropy.units as u
@@ -30,21 +30,8 @@ import skyfield.api as sf
 from skyfield import positionlib, toposlib
 
 from pandas_skyfield_extension.options import config
+from pandas_skyfield_extension.sf_converters import to_sf_position
 from pandas_skyfield_extension.typing import Frame
-
-
-def as_position(obj) -> positionlib.ICRF:
-    """Convert the input to a position, if possible."""
-    if isinstance(obj, positionlib.ICRF):
-        return obj
-    elif isinstance(obj, SkyfieldPositionExtensionArray):
-        return obj.position
-    elif isinstance(obj, list) and len(obj) == 1:
-        # positionlib.ICRF objects do not have an __array__ method, during sanitize_array pandas therefore calls list(obj)
-        # Therefore we need to unpack the list here
-        return as_position(obj[0])
-    else:
-        raise TypeError(f"Cannot convert {obj} to a position.")
 
 
 def _copy_sf_time(t: sf.Time) -> sf.Time:
@@ -153,7 +140,7 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
         frame: type | None = None,
         copy: bool = True,
     ):
-        position = as_position(position)
+        position = to_sf_position(position)
         if position is not None and not isinstance(position, positionlib.ICRF):
             raise ValueError(f"Invalid position type: {type(position)}")
         if frame is not None and frame is not type(position):
@@ -375,8 +362,8 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
                     f"Operator {op_name} is not supported for SkyfieldPositionExtensionArray."
                 )
             # Convert the thing to a skyfield position
-            self_pos = as_position(self)
-            other_pos = as_position(other)
+            self_pos = to_sf_position(self)
+            other_pos = to_sf_position(other)
 
             if is_comparison:
                 # Try apply conversion (we need same type for comparisons)
@@ -396,6 +383,10 @@ class SkyfieldPositionExtensionArray(ExtensionArray, ExtensionScalarOpsMixin):
 
     def copy(self, deep=False) -> "SkyfieldPositionExtensionArray":
         return self.__class__(_copy_position(self.position), self.frame, copy=True)
+
+    @classmethod
+    def _concat_same_type(cls, to_concat: Sequence[Self]) -> Self:
+        return cls(to_sf_position(to_concat))
 
 
 SkyfieldPositionExtensionArray._add_arithmetic_ops()
