@@ -3,17 +3,75 @@ from __future__ import annotations
 from typing import Any
 
 import astropy.units as u
+import numpy as np
 import pandas as pd
 import pandas_units_extension as pue
 import skyfield.api as sf
 from pandas.api.types import is_list_like
 
 
+####################
+# Helper functions #
+####################
+
+
 def _is_UnitsDtype_of_physical_type(dtype: Any, physical_type: str) -> bool:
     """Check if the dtype is a UnitsDtype of the specified physical type."""
     return (
-        isinstance(dtype, pue.UnitsDtype) and dtype.unit.physical_type == physical_type
+        isinstance(dtype, pue.UnitsDtype) and dtype.unit.physical_type == physical_type  # type: ignore[union-attr]
     )
+
+
+##################
+# Concatenations #
+##################
+
+
+def concat_sf_times(times: list[sf.Time], ts: sf.Timescale | None = None) -> sf.Time:
+    """Concatenate a list of Skyfield Time objects into a single Time object.
+
+    Parameters
+    ----------
+    times: list[sf.Time]
+        The list of Skyfield Time objects to concatenate.
+    ts: sf.Timescale, optional
+        The timescale to use for the concatenation. If None, the timescale of the first Time object will be used.
+
+    Returns
+    -------
+    sf.Time
+        The concatenated Skyfield Time object.
+    """
+    if not times:
+        raise ValueError("times must not be empty")
+
+    # Extract the timescale from the first Time object if not provided
+    if ts is None:
+        ts = getattr(times[0], "ts", None)
+    whole_parts: list[np.ndarray] = []
+    frac_parts: list[np.ndarray] = []
+
+    # Iterate over list of Time objects and append whole and fractional Julian dates
+    for t in times:
+        if not isinstance(t, sf.Time):
+            raise TypeError(f"Object {t} is not a skyfield Time")
+        if t.ts is not ts:
+            raise ValueError("All Time objects must use the same Timescale instance")
+
+        # Convert zerodim Time objects to 1D arrays for concatenation
+        whole_parts.append(np.atleast_1d(t.whole))
+        frac_parts.append(np.atleast_1d(t.tt_fraction))
+
+    # Concatenate the whole and fractional parts into single arrays
+    whole = np.concatenate(whole_parts)
+    frac = np.concatenate(frac_parts)
+
+    return sf.Time(ts, whole, frac)
+
+
+###############################
+# High level Skyfield objects #
+###############################
 
 
 def to_sf_time(times, ts: sf.Timescale | None = None) -> sf.Time:
@@ -21,7 +79,7 @@ def to_sf_time(times, ts: sf.Timescale | None = None) -> sf.Time:
 
     Parameters
     ----------
-    times: datetime.datetime or sf.Time or convertible by pd.to_datetime
+    times: datetime.datetime or sf.Time or list thereof or any object convertible by pd.to_datetime
         The times to convert.
     ts: sf.Timescale, optional
         The timescale to use for the conversion. If None, the default timescale will be used.
@@ -33,6 +91,10 @@ def to_sf_time(times, ts: sf.Timescale | None = None) -> sf.Time:
     """
     if isinstance(times, sf.Time):
         return times
+
+    # Handle list of Skyfield Time objects
+    if is_list_like(times) and all(isinstance(t, sf.Time) for t in times):
+        return concat_sf_times(times, ts)
 
     # Use default timescale if not provided
     if not ts:
@@ -47,6 +109,11 @@ def to_sf_time(times, ts: sf.Timescale | None = None) -> sf.Time:
 
     # Convert to Skyfield Time object
     return ts.from_datetimes(dts)
+
+
+##########################
+# Skyfield Unit objects #
+##########################
 
 
 def to_sf_angle(obj: Any) -> sf.Angle:

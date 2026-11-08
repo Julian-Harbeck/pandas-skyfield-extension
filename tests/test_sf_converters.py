@@ -11,6 +11,7 @@ import skyfield.api as sf
 
 from pandas_skyfield_extension.sf_converters import (
     _is_UnitsDtype_of_physical_type,
+    concat_sf_times,
     to_sf_angle,
     to_sf_distance,
     to_sf_time,
@@ -50,10 +51,53 @@ def three_sf_times(ts) -> sf.Time:
     return ts.utc(2000, 1, [1, 2, 3], 0, 0, 0)
 
 
+class TestConcatSfTimes:
+    def test_concat_mixed_scalar_and_array(self, ts):
+        scalar = ts.utc(2000, 1, 1, 0, 0, 0)
+        array = ts.utc(2000, 1, [2, 3], 0, 0, 0)
+
+        result = concat_sf_times([scalar, array])
+        expected = ts.utc(2000, 1, [1, 2, 3], 0, 0, 0)
+
+        assert result.shape == (3,)
+        assert np.all(result == expected)
+
+    def test_concat_multiple_scalars(self, ts: sf.Timescale):
+        times = [ts.utc(2000, 1, 1, 0, 0, 0), ts.utc(2000, 1, 2, 0, 0, 0)]
+
+        result = concat_sf_times(times)
+        expected = ts.utc(2000, 1, [1, 2], 0, 0, 0)
+
+        assert result.shape == (2,)
+        assert np.all(result == expected)
+
+    def test_concat_empty_raises(self):
+        with pytest.raises(ValueError, match="times must not be empty"):
+            concat_sf_times([])
+
+    def test_concat_non_time_raises(self, ts: sf.Timescale):
+        non_time = "2000-01-01T00:00:00Z"
+        with pytest.raises(TypeError, match="Object .* is not a skyfield Time"):
+            concat_sf_times([ts.utc(2000, 1, 1, 0, 0, 0), non_time])
+
+    def test_concat_mismatched_timescales_raises(self, ts: sf.Timescale):
+        other_ts = sf.load.timescale()
+        time_a = ts.utc(2000, 1, 1, 0, 0, 0)
+        time_b = other_ts.utc(2000, 1, 2, 0, 0, 0)
+
+        with pytest.raises(ValueError, match="same Timescale"):
+            concat_sf_times([time_a, time_b])
+
+
 class TestToSfTime:
     def test_sf_time(self, time):
         result: sf.Time = to_sf_time(time)
         assert result is time
+
+    def test_list_sf_time(self, three_sf_times):
+        times = [three_sf_times[0], three_sf_times[1], three_sf_times[2]]
+        result: sf.Time = to_sf_time(times)
+        assert all(result == three_sf_times)
 
     def test_datetime(self, time, time_isoformat):
         dt = datetime.datetime.fromisoformat(time_isoformat)
