@@ -7,6 +7,7 @@ from .position_extension import (
 )
 
 from .sf_converters import (
+    to_sf_position,
     to_sf_time,
     to_sf_angle,
     to_sf_distance,
@@ -25,5 +26,6 @@ __all__: list[str] = [
     "to_sf_time",
     "to_sf_angle",
     "to_sf_distance",
+    "to_sf_position",
     "to_sf_velocity",
 ]

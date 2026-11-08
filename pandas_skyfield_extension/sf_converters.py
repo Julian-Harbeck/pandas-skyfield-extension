@@ -6,13 +6,24 @@ import astropy.units as u
 import numpy as np
 import pandas as pd
 import pandas_units_extension as pue
-import skyfield.api as sf
+from skyfield import (
+    api as sf,
+    positionlib,
+)
 from pandas.api.types import is_list_like
 
 
 ####################
 # Helper functions #
 ####################
+
+
+def _as_3xN_array(value: Any) -> np.ndarray:
+    """Normalize a Skyfield vector to a 3×N array for concatenation."""
+    arr = np.asarray(value)
+    if arr.ndim == 1:
+        arr = arr[:, np.newaxis]
+    return arr
 
 
 def _is_UnitsDtype_of_physical_type(dtype: Any, physical_type: str) -> bool:
@@ -25,6 +36,52 @@ def _is_UnitsDtype_of_physical_type(dtype: Any, physical_type: str) -> bool:
 ##################
 # Concatenations #
 ##################
+
+
+def concat_sf_positions(obj: Any) -> positionlib.ICRF:
+    """Concatenate a list of Skyfield position objects into a single position object.
+
+    Parameters
+    ----------
+    obj: Any
+        The list of objects to concatenate. Each object should be convertible to a Skyfield position.
+
+    Returns
+    -------
+    positionlib.ICRF
+        The concatenated Skyfield position object.
+    """
+    # Convert all objects to Skyfield position objects
+    try:
+        positions: list[positionlib.ICRF] = [to_sf_position(x) for x in obj]
+    except (TypeError, ValueError):
+        raise TypeError(f"Cannot convert list of {type(obj[0])} to a position.")
+
+    # Use first position as reference for center, target and output type
+    first_pos: positionlib.ICRF = positions[0]
+    cls = type(first_pos)
+
+    # Check that all positions have the same center and target, otherwise raise an error
+    if not all(
+        pos.center == first_pos.center and pos.target == first_pos.target
+        for pos in positions
+    ):
+        raise ValueError(
+            "All positions must have the same center and target to be combined into a single position."
+        )
+
+    # Concatenate the positions, velocities, and times into a single position object
+    position_au = np.concatenate([_as_3xN_array(x.xyz.au) for x in positions], axis=1)
+    velocity_au_per_d = np.concatenate(
+        [_as_3xN_array(x.velocity.au_per_d) for x in positions], axis=1
+    )
+    return cls(
+        position_au=position_au,
+        velocity_au_per_d=velocity_au_per_d,
+        t=concat_sf_times([x.t for x in positions]),
+        center=first_pos.center,
+        target=first_pos.target,
+    )
 
 
 def concat_sf_times(times: list[sf.Time], ts: sf.Timescale | None = None) -> sf.Time:
@@ -72,6 +129,39 @@ def concat_sf_times(times: list[sf.Time], ts: sf.Timescale | None = None) -> sf.
 ###############################
 # High level Skyfield objects #
 ###############################
+
+
+def to_sf_position(obj) -> positionlib.ICRF:
+    """Convert the input to a Skyfield position object.
+
+    Parameters
+    ----------
+    obj: Any
+        The object to convert to a Skyfield position.
+
+    Returns
+    -------
+    positionlib.ICRF
+        The corresponding Skyfield position object.
+    """
+    if isinstance(obj, positionlib.ICRF):
+        return obj
+
+    # Handle SkyfieldExtensionArray objects without importing the class directly
+    elif hasattr(obj, "position") and isinstance(obj.position, positionlib.ICRF):
+        return obj.position
+
+    elif isinstance(obj, list) and len(obj) == 1:
+        # positionlib.ICRF objects do not have an __array__ method, during sanitize_array pandas therefore calls list(obj)
+        # Therefore we need to unpack the list here
+        return to_sf_position(obj[0])
+
+    elif (
+        is_list_like(obj) and len(obj) > 1 and all(type(x) is type(obj[0]) for x in obj)
+    ):
+        return concat_sf_positions(obj)
+    else:
+        raise TypeError(f"Cannot convert {obj} to a position.")
 
 
 def to_sf_time(times, ts: sf.Timescale | None = None) -> sf.Time:

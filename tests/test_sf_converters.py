@@ -7,13 +7,20 @@ import numpy as np
 import pandas as pd
 import pandas_units_extension as pue
 import pytest
-import skyfield.api as sf
+from skyfield import (
+    api as sf,
+    positionlib,
+)
 
+from pandas_skyfield_extension import SkyfieldPositionExtensionArray
 from pandas_skyfield_extension.sf_converters import (
+    _as_3xN_array,
     _is_UnitsDtype_of_physical_type,
+    concat_sf_positions,
     concat_sf_times,
     to_sf_angle,
     to_sf_distance,
+    to_sf_position,
     to_sf_time,
     to_sf_velocity,
 )
@@ -49,6 +56,116 @@ def time_isoformat() -> str:
 @pytest.fixture
 def three_sf_times(ts) -> sf.Time:
     return ts.utc(2000, 1, [1, 2, 3], 0, 0, 0)
+
+
+@pytest.fixture
+def scalar_position(ts) -> positionlib.ICRF:
+    return positionlib.build_position(
+        position_au=[1.0, 2.0, 3.0],
+        velocity_au_per_d=[0.1, 0.2, 0.3],
+        t=ts.utc(2000, 1, 1, 0, 0, 0),
+        center=399,
+        target=None,
+    )
+
+
+@pytest.fixture
+def array_position(ts) -> positionlib.ICRF:
+    return positionlib.build_position(
+        position_au=[[4.0, 5.0], [6.0, 7.0], [8.0, 9.0]],
+        velocity_au_per_d=[[0.4, 0.5], [0.6, 0.7], [0.8, 0.9]],
+        t=ts.utc(2000, 1, [2, 3], 0, 0, 0),
+        center=399,
+        target=None,
+    )
+
+
+@pytest.fixture
+def pair_of_positions(ts, scalar_position) -> list[positionlib.ICRF]:
+    pos2 = positionlib.build_position(
+        position_au=[4.0, 5.0, 6.0],
+        velocity_au_per_d=[0.4, 0.5, 0.6],
+        t=ts.utc(2000, 1, 2, 0, 0, 0),
+        center=399,
+        target=None,
+    )
+    return [scalar_position, pos2]
+
+
+####################
+# Helper functions #
+####################
+
+
+class TestAs3xNArray:
+    def test_scalar_vector_becomes_column_vector(self):
+        value = np.array([1.0, 2.0, 3.0])
+
+        result = _as_3xN_array(value)
+
+        assert result.shape == (3, 1)
+        np.testing.assert_array_equal(result, value[:, np.newaxis])
+
+    def test_matrix_is_unchanged(self):
+        value = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+
+        result = _as_3xN_array(value)
+
+        assert result.shape == (3, 2)
+        np.testing.assert_array_equal(result, value)
+
+
+class TestIsUnitsDtypeOfPhysicalType:
+    def test_non_UnitsDtype(self):
+        dtype = pd.Int64Dtype()
+        assert not _is_UnitsDtype_of_physical_type(dtype, u.physical.length)
+
+    def test_matching_physical_type(self):
+        dtype = pue.UnitsDtype(u.m)
+        assert _is_UnitsDtype_of_physical_type(dtype, u.physical.length)
+
+    def test_non_matching_physical_type(self):
+        dtype = pue.UnitsDtype(u.s)
+        assert not _is_UnitsDtype_of_physical_type(dtype, u.physical.length)
+
+
+##################
+# Concatenations #
+##################
+
+
+class TestConcatSfPositions:
+    def test_position_input(self, scalar_position):
+        with pytest.raises(IndexError, match="list index out of range"):
+            concat_sf_positions(scalar_position)
+
+    def test_mixed_scalar_and_array(self, ts, scalar_position, array_position):
+        result = concat_sf_positions([scalar_position, array_position])
+
+        assert result.position.au.shape == (3, 3)
+        assert result.velocity.au_per_d.shape == (3, 3)
+        assert result.t.shape == (3,)
+        assert np.all(result.t == ts.utc(2000, 1, [1, 2, 3], 0, 0, 0))
+
+    def test_list_of_positions_same_center_target(self, ts, pair_of_positions):
+        result = concat_sf_positions(pair_of_positions)
+
+        assert result.position.au.shape == (3, 2)
+        assert result.velocity.au_per_d.shape == (3, 2)
+        assert result.t.shape == (2,)
+        assert np.all(result.t == ts.utc(2000, 1, [1, 2], 0, 0, 0))
+
+    def test_list_of_positions_mismatched_targets_raises(self, ts, scalar_position):
+        mismatched = positionlib.build_position(
+            position_au=[4.0, 5.0, 6.0],
+            velocity_au_per_d=[0.4, 0.5, 0.6],
+            t=ts.utc(2000, 1, 2, 0, 0, 0),
+            center=0,
+            target=10,
+        )
+
+        with pytest.raises(ValueError, match="same center and target"):
+            concat_sf_positions([scalar_position, mismatched])
 
 
 class TestConcatSfTimes:
@@ -87,6 +204,38 @@ class TestConcatSfTimes:
 
         with pytest.raises(ValueError, match="same Timescale"):
             concat_sf_times([time_a, time_b])
+
+
+###############################
+# High level Skyfield objects #
+###############################
+
+
+class TestToSfPosition:
+    def test_position_input(self, scalar_position):
+        result = to_sf_position(scalar_position)
+        assert result is scalar_position
+
+    def test_skyfield_position_array(self, array_position):
+        result = to_sf_position(SkyfieldPositionExtensionArray(array_position))
+        assert np.all(result.position.au == array_position.position.au)
+        assert np.all(result.velocity.au_per_d == array_position.velocity.au_per_d)
+        assert np.all(result.t == array_position.t)
+
+    def test_list_single_item(self, scalar_position):
+        result = to_sf_position([scalar_position])
+        assert result is scalar_position
+
+    def test_list_dispatches_to_concat(self, scalar_position):
+        result = to_sf_position([scalar_position, scalar_position])
+
+        assert result.position.au.shape == (3, 2)
+        assert result.velocity.au_per_d.shape == (3, 2)
+        assert result.t.shape == (2,)
+
+    def test_unsupported_object_raises(self):
+        with pytest.raises(TypeError, match="Cannot convert"):
+            to_sf_position(object())
 
 
 class TestToSfTime:
@@ -130,18 +279,9 @@ class TestToSfTime:
     #     assert result is time
 
 
-class TestIsUnitsDtypeOfPhysicalType:
-    def test_non_UnitsDtype(self):
-        dtype = pd.Int64Dtype()
-        assert not _is_UnitsDtype_of_physical_type(dtype, u.physical.length)
-
-    def test_matching_physical_type(self):
-        dtype = pue.UnitsDtype(u.m)
-        assert _is_UnitsDtype_of_physical_type(dtype, u.physical.length)
-
-    def test_non_matching_physical_type(self):
-        dtype = pue.UnitsDtype(u.s)
-        assert not _is_UnitsDtype_of_physical_type(dtype, u.physical.length)
+##########################
+# Skyfield Unit objects #
+##########################
 
 
 class TestToSfAngle:
