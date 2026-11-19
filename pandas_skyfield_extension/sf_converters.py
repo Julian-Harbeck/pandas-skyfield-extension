@@ -26,6 +26,23 @@ def _as_3xN_array(value: Any) -> np.ndarray:
     return arr
 
 
+def _ensure_position_1d(pos: positionlib.ICRF) -> positionlib.ICRF:
+    """Ensure Skyfield positions are represented as a length-N vector (N>=1)."""
+    # Check if the position is already a vector (length-N)
+    if pos.t.shape != ():
+        return pos
+
+    # Convert scalar position to a length-one vector
+    cls = type(pos)
+    return cls(
+        position_au=_as_3xN_array(pos.xyz.au),
+        velocity_au_per_d=_as_3xN_array(pos.velocity.au_per_d),
+        t=concat_sf_times([pos.t]),
+        center=pos.center,
+        target=pos.target,
+    )
+
+
 def _is_UnitsDtype_of_physical_type(dtype: Any, physical_type: str) -> bool:
     """Check if the dtype is a UnitsDtype of the specified physical type."""
     return (
@@ -145,11 +162,11 @@ def to_sf_position(obj) -> positionlib.ICRF:
         The corresponding Skyfield position object.
     """
     if isinstance(obj, positionlib.ICRF):
-        return obj
+        return _ensure_position_1d(obj)
 
     # Handle SkyfieldExtensionArray objects without importing the class directly
     elif hasattr(obj, "position") and isinstance(obj.position, positionlib.ICRF):
-        return obj.position
+        return _ensure_position_1d(obj.position)
 
     elif is_list_like(obj) and len(obj) == 1:
         # positionlib.ICRF objects do not have an __array__ method, during sanitize_array pandas therefore calls list(obj)
