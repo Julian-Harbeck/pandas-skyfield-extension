@@ -15,6 +15,7 @@ from skyfield import (
 from pandas_skyfield_extension import SkyfieldPositionExtensionArray
 from pandas_skyfield_extension.sf_converters import (
     _as_3xN_array,
+    _ensure_position_1d,
     _is_UnitsDtype_of_physical_type,
     concat_sf_positions,
     concat_sf_times,
@@ -115,6 +116,33 @@ class TestAs3xNArray:
         np.testing.assert_array_equal(result, value)
 
 
+class TestEnsurePosition1d:
+    def test_scalar_position_becomes_length_one_vector(
+        self, scalar_position: positionlib.ICRF
+    ):
+        result = _ensure_position_1d(scalar_position)
+
+        assert result.position.au.shape == (3, 1)
+        assert result.velocity.au_per_d.shape == (3, 1)
+        assert result.t.shape == (1,)
+        assert result.center == scalar_position.center
+        assert result.target == scalar_position.target
+        np.testing.assert_allclose(
+            result.position.au[:, 0], scalar_position.position.au
+        )
+        np.testing.assert_allclose(
+            result.velocity.au_per_d[:, 0], scalar_position.velocity.au_per_d
+        )
+        assert result.t[0] == scalar_position.t
+
+    def test_vector_position_is_returned_unchanged(
+        self, array_position: positionlib.ICRF
+    ):
+        result = _ensure_position_1d(array_position)
+
+        assert result is array_position
+
+
 class TestIsUnitsDtypeOfPhysicalType:
     def test_non_UnitsDtype(self):
         dtype = pd.Int64Dtype()
@@ -135,11 +163,13 @@ class TestIsUnitsDtypeOfPhysicalType:
 
 
 class TestConcatSfPositions:
-    def test_position_input(self, scalar_position):
+    def test_position_input(self, scalar_position: positionlib.ICRF):
         with pytest.raises(IndexError, match="list index out of range"):
             concat_sf_positions(scalar_position)
 
-    def test_mixed_scalar_and_array(self, ts, scalar_position, array_position):
+    def test_mixed_scalar_and_array(
+        self, ts, scalar_position, array_position: positionlib.ICRF
+    ):
         result = concat_sf_positions([scalar_position, array_position])
 
         assert result.position.au.shape == (3, 3)
@@ -155,7 +185,9 @@ class TestConcatSfPositions:
         assert result.t.shape == (2,)
         assert np.all(result.t == ts.utc(2000, 1, [1, 2], 0, 0, 0))
 
-    def test_list_of_positions_mismatched_targets_raises(self, ts, scalar_position):
+    def test_list_of_positions_mismatched_targets_raises(
+        self, ts, scalar_position: positionlib.ICRF
+    ):
         mismatched = positionlib.build_position(
             position_au=[4.0, 5.0, 6.0],
             velocity_au_per_d=[0.4, 0.5, 0.6],
@@ -212,30 +244,39 @@ class TestConcatSfTimes:
 
 
 class TestToSfPosition:
-    def test_position_input(self, scalar_position):
+    def _verify_shape(self, result: positionlib.ICRF, target_length: int):
+        assert result.position.au.shape == (3, target_length)
+        assert result.velocity.au_per_d.shape == (3, target_length)
+        assert result.t.shape == (target_length,)
+
+    def test_position_input(self, scalar_position: positionlib.ICRF):
         result = to_sf_position(scalar_position)
-        assert result is scalar_position
+        self._verify_shape(result, 1)
+        np.testing.assert_allclose(
+            result.position.au[:, 0], scalar_position.position.au
+        )
+        np.testing.assert_allclose(
+            result.velocity.au_per_d[:, 0], scalar_position.velocity.au_per_d
+        )
+        assert result.t[0] == scalar_position.t
 
-    def test_skyfield_position_array(self, array_position):
+    def test_skyfield_position_array(self, array_position: positionlib.ICRF):
         result = to_sf_position(SkyfieldPositionExtensionArray(array_position))
-        assert np.all(result.position.au == array_position.position.au)
-        assert np.all(result.velocity.au_per_d == array_position.velocity.au_per_d)
-        assert np.all(result.t == array_position.t)
+        assert np.allclose(result.position.au, array_position.position.au)
+        assert np.allclose(result.velocity.au_per_d, array_position.velocity.au_per_d)
+        assert np.allclose(result.t.tt, array_position.t.tt)
 
-    def test_list_single_item(self, scalar_position):
+    def test_list_single_item(self, scalar_position: positionlib.ICRF):
         result = to_sf_position([scalar_position])
-        assert result is scalar_position
+        self._verify_shape(result, 1)
 
-    def test_array_single_item(self, scalar_position):
+    def test_array_single_item(self, scalar_position: positionlib.ICRF):
         result = to_sf_position(np.array([scalar_position], dtype=object))
-        assert result is scalar_position
+        self._verify_shape(result, 1)
 
-    def test_list_dispatches_to_concat(self, scalar_position):
+    def test_list_dispatches_to_concat(self, scalar_position: positionlib.ICRF):
         result = to_sf_position([scalar_position, scalar_position])
-
-        assert result.position.au.shape == (3, 2)
-        assert result.velocity.au_per_d.shape == (3, 2)
-        assert result.t.shape == (2,)
+        self._verify_shape(result, 2)
 
     def test_unsupported_object_raises(self):
         with pytest.raises(TypeError, match="Cannot convert"):
