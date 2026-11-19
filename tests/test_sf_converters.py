@@ -226,6 +226,10 @@ class TestToSfPosition:
         result = to_sf_position([scalar_position])
         assert result is scalar_position
 
+    def test_array_single_item(self, scalar_position):
+        result = to_sf_position(np.array([scalar_position], dtype=object))
+        assert result is scalar_position
+
     def test_list_dispatches_to_concat(self, scalar_position):
         result = to_sf_position([scalar_position, scalar_position])
 

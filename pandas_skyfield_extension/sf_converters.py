@@ -151,9 +151,10 @@ def to_sf_position(obj) -> positionlib.ICRF:
     elif hasattr(obj, "position") and isinstance(obj.position, positionlib.ICRF):
         return obj.position
 
-    elif isinstance(obj, list) and len(obj) == 1:
+    elif is_list_like(obj) and len(obj) == 1:
         # positionlib.ICRF objects do not have an __array__ method, during sanitize_array pandas therefore calls list(obj)
-        # Therefore we need to unpack the list here
+        #  Therefore we need to unpack the list-like here.
+        # We also land here during conversion from an object dtype series with length 1.
         return to_sf_position(obj[0])
 
     elif (
